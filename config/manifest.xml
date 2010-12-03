@@ -9,6 +9,7 @@
    <config file="config/canvas.xml"/>
    <config file="config/common.xml"/>
    <config file="config/arena.xml"/>
-   <config file="config/lua.xml"/>
+<!--   <config file="config/lua.xml"/> -->
+   <config file="js.xml"/>
    <config file="config/input.xml"/>
 </manifest>
