@@ -6,15 +6,17 @@
    <plugin name="dmzQtPluginCanvasObject"/>
    <plugin name="dmzQtPluginCanvasZoomPan"/>
    <plugin name="dmzQtPluginVersion"/>
-   <plugin name="dmzQtPluginWidget" unique="graph"/>
-   <plugin name="dmzQtPluginWidget" unique="controls"/>
-   <plugin name="dmzQtPluginGraph"/>
-   <plugin name="dmzMitesPluginControls"/>
+   <!-- <plugin name="dmzQtPluginWidget" unique="graph"/> -->
+   <!-- <plugin name="dmzQtPluginWidget" unique="controls"/> -->
+   <!-- <plugin name="dmzQtPluginGraph"/> -->
+   <!-- <plugin name="dmzMitesPluginControls"/> -->
 </plugin-list>
+<!--
 <dmzQtPluginCanvasZoomPan>
    <zoom default="0.1" min="0.1" max="1.0"/>
    <hide value="true"/>
 </dmzQtPluginCanvasZoomPan>
+-->
 <dmzQtModuleMainWindowBasic>
    <corners>
       <top right="true" left="true"/>
@@ -22,6 +24,7 @@
    </corners>
    <window title="DMZ: Mites"/>
    <central-widget name="dmzQtModuleCanvasBasic"/>
+   <!--
    <dock-windows>
       <group area="right">
          <widget name="controls" title="Controls">
@@ -32,7 +35,9 @@
          <widget name="graph" title="Chip Clusters"/>
       </group>
    </dock-windows>
+   -->
 </dmzQtModuleMainWindowBasic>
+<!--
 <graph>
    <frame>
       <widget>
@@ -44,16 +49,18 @@
 <controls>
    <widget name="dmzMitesPluginControls"/>
 </controls>
+-->
 <dmzQtModuleCanvasBasic>
    <frame>
       <widget>
-         <minimum-size width="550" height="550"/>
+         <minimum-size width="600" height="600"/>
       </widget>
    </frame>
    <canvas opengl="true" antialiasing="true" textantialiasing="true"/>
    <scene>
-      <min x="-2500" y="-2500"/>
-      <max x="2500" y="2500"/>
+      <background grid="false"/>
+      <min x="-300" y="-300"/>
+      <max x="300" y="300"/>
    </scene>
    <scrollbars value="true"/>
 </dmzQtModuleCanvasBasic>
@@ -68,6 +75,7 @@
 <dmzQtPluginCanvasLayer>
    <dockWidget title="Networks"/>
 </dmzQtPluginCanvasLayer>
+<!--
 <dmzQtPluginGraph>
    <set>
       <object-type name="chip"/>
@@ -87,4 +95,5 @@
       </fill>
    </bar>
 </dmzQtPluginGraph>
+-->
 </dmz>

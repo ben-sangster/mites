@@ -10,7 +10,7 @@
       <dmzQtPluginCanvasObjectBasic>
          <items>
             <image name="mite" resource="mite">
-               <offset x="-64" y="-64"/>
+<!--               <offset x="-64" y="-64"/> -->
             </image>
          </items>
          <switch>
@@ -25,7 +25,7 @@
       <dmzQtPluginCanvasObjectBasic>
          <items>
             <image name="chip" resource="chip">
-               <offset x="-32" y="-32"/>
+<!--               <offset x="-32" y="-32"/> -->
             </image>
          </items>
          <switch>

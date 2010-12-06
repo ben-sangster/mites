@@ -5,8 +5,8 @@
    <search>
       <path value="./assets/"/>
    </search>
-   <resource name="mite" file="mite.png"/>
-   <resource name="chip" file="chip.png"/>
+   <resource name="mite" file="mite-small.png"/>
+   <resource name="chip" file="chip-small.png"/>
 </resource-map>
 </runtime>
 </dmz>

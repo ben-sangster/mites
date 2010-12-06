@@ -19,15 +19,15 @@ var dmz =
 
 // Constant decls
 
-   , ChipOffset = dmz.vector.create (0, 0, -96)
+   , ChipOffset = dmz.vector.create (0, 0, -14)
    , UnitMatrix = dmz.matrix.create ()
    , MaxTurn = Math.PI / 2
    , TurnDelay = 3
-   , Speed = 3000
+   , Speed = 300
    , WaitTime = 1
    , Arena =
-        { max: dmz.vector.create([-3000, 0, -2000])
-        , min: dmz.vector.create([3000, 0, 2000])
+        { max: dmz.vector.create([300, 0, 300])
+        , min: dmz.vector.create([-300, 0, -300])
         }
    , MiteType = dmz.objectType.lookup("mite")
    , ChipType = dmz.objectType.lookup("chip")
@@ -53,6 +53,7 @@ var dmz =
      , ori: Matrix orientation
      , nextTurn: Number nextTurn
      , chip: reference to element of Chips[]
+     , timer: Time until haul change
      }
      */
    , Chips = []
@@ -62,11 +63,12 @@ var dmz =
      , mite: reference to an element of Mites[]
      }
      */
-   , active = true
+   , ChipHandleMap = {}
+   , active = false
    , ControlsForm = dmz.ui.loader.load("./scripts/Controls.ui")
    , ControlsDock = dmz.ui.mainWindow.createDock
      ("Controls"
-     , { area: dmz.ui.consts.LeftDockWidgetArea, floating: true }
+     , { area: dmz.ui.consts.LeftDockWidgetArea }
      , ControlsForm
      )
    , reset = true
@@ -78,12 +80,9 @@ var dmz =
    , calcNextTurnTime
    , validatePosition
    , updateMites
-   , updateChips
    , updateMiteCount
    , updateChipCount
    , initMites
-   , initChips
-   , getMite = function (chip) { (chip && chip.mite) ? chip.mite : false; }
    , findChipCluster
    , updateChipClusters
    , findNearestChip
@@ -108,8 +107,8 @@ validatePosition = function (pos) {
 
 worker = function (time) {
 
+   if (reset) { initMites(); reset = false;}
    updateMites (time);
-   updateChips (time);
    updateChipClusters (time);
    updateHaul (time);
 }
@@ -120,12 +119,11 @@ updateMites = function (time) {
      , mite
      , pos
      , ori
+     , vec
      ;
 
-   if (reset) { initMites(); }
    if (active) {
 
-//      for (mite in Mites) {
       Mites.forEach(function (mite) {
 
 //         self.log.warn ("mite:", mite.object, mite.pos, mite.ori, mite.nextTurn, mite.chip);
@@ -138,6 +136,7 @@ updateMites = function (time) {
                      dmz.vector.Up,
                      (Math.random() - 0.5) * MaxTurn)
                         .multiply(ori);
+
             mite.nextTurn = calcNextTurnTime(TurnDelay);
          }
          pos = pos.add(ori.transform(dmz.vector.Forward).multiply(time * Speed));
@@ -146,28 +145,20 @@ updateMites = function (time) {
          mite.ori = ori;
          dmz.object.position(mite.object, null, mite.pos);
          dmz.object.orientation(mite.object, null, mite.ori);
+         if (mite.chip) {
+
+//            vec = ori.transform (ChipOffset);
+//            pos = pos.add(vec);
+            pos = pos.add(ori.transform(ChipOffset));
+            validatePosition(pos);
+            dmz.object.position (
+               mite.chip.object,
+               null,
+               pos);
+//               pos.add(ori.transform(ChipOffset)));
+         }
       });
    }
-}
-
-updateChips = function (time) {
-
-   var chip
-     , mite
-     , pos
-     , ori
-     ;
-//   for (chip in Chips) {
-   Chips.forEach(function (chip) {
-
-      mite = getMite(chip);
-      if (mite) {
-
-         pos = mite.pos;
-         ori = mite.ori;
-         dmz.object.position (chip.object, null, pos.add(ori.transform (ChipOffset)));
-      }
-   });
 }
 
 initMites = function () {
@@ -176,8 +167,9 @@ initMites = function () {
      , chip
      ;
 
-   ClusterSphere.radius(800);
-   HaulSphere.radius(80);
+   ClusterSphere.radius(80);
+   HaulSphere.radius(8);
+
    // clearCanvas();
 
    // Move these two while loops to clearCanvas code.
@@ -201,7 +193,6 @@ initMites = function () {
 
    updateMiteCount(MiteCount);
    updateChipCount(ChipCount);
-   reset = false;
 }
 
 updateMiteCount = function (count) {
@@ -213,12 +204,12 @@ updateMiteCount = function (count) {
      , mite
      ;
 
+//   self.log.warn ("MiteCount:", count, MiteCount, Mites.length);
    MiteCount = count;
-//   self.log.warn ("MiteCount:", MiteCount, Mites.length);
    MinX = Arena.min.x;
-   MaxX = Arena.max.x;
+   MaxX = Arena.max.x - MinX;
    MinZ = Arena.min.z;
-   MaxZ = Arena.max.z;
+   MaxZ = Arena.max.z - MinZ;
 
    while (Mites.length < MiteCount) {
 
@@ -262,13 +253,14 @@ updateChipCount = function (count) {
 
    ChipCount = count;
    MinX = Arena.min.x;
-   MaxX = Arena.max.x;
+   MaxX = Arena.max.x - MinX;
    MinZ = Arena.min.z;
-   MaxZ = Arena.max.z;
+   MaxZ = Arena.max.z - MinZ;
    while (Chips.length < ChipCount) {
 
       chip = {}
       chip.object = dmz.object.create (ChipType);
+//      self.log.warn ("chip.object:", chip.object);
       chip.mite = false;
       chip.pos = dmz.vector.create(
          [ MaxX * Math.random() + MinX
@@ -279,6 +271,7 @@ updateChipCount = function (count) {
       dmz.object.orientation (chip.object, null, UnitMatrix);
       dmz.object.activate(chip.object);
       Chips.push(chip);
+      ChipHandleMap[chip.object] = chip;
    }
    while (Chips.length > ChipCount) {
 
@@ -287,6 +280,7 @@ updateChipCount = function (count) {
       chip.object = 0;
       chip.pos = dmz.vector.create();
       if (chip.mite) { chip.mite.chip = false; chip.mite = false; }
+      delete ChipHandleMap[chip.object];
    }
 }
 
@@ -398,16 +392,15 @@ updateHaul = function (time) {
    if (active) {
 
       ctime = dmz.time.getFrameTime();
-//      for (mite in Mites) {
       Mites.forEach(function (mite) {
 
-         timer = dmz.object.timeStamp (mite.object, TimerHandle);
+         timer = mite.timer;
          if (!timer) { timer = ctime; }
          if (timer <= ctime) {
 
             ori = mite.ori;
             pos = mite.pos;
-            chip = findNearestChip(pos);
+            chip = ChipHandleMap[findNearestChip(pos)];
             if (chip) {
 
                if (mite.chip) {
@@ -420,7 +413,7 @@ updateHaul = function (time) {
                   mite.chip = chip;
                   chip.mite = mite;
                }
-               dmz.object.timeStamp(mite.object, TimerHandle, ctime + WaitTime);
+               mite.timer = ctime + WaitTime;
             }
          }
       });
